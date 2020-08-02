@@ -1,8 +1,0 @@
-sccb.c:29:14:sccb_bus_start	8	static
-sccb.c:42:13:sccb_bus_stop	8	static
-sccb.c:53:13:sccb_bus_send_noack	8	static
-sccb.c:65:13:sccb_bus_send_ack	8	static
-sccb.c:79:16:sccb_bus_write_byte	24	static
-sccb.c:108:16:sccb_bus_read_byte	16	static
-sccb.c:132:9:wrSensorReg8_8	16	static
-sccb.c:157:9:rdSensorReg8_8	16	static
