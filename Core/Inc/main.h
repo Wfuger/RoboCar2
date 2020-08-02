@@ -110,12 +110,12 @@ void Error_Handler(void);
 #define RMII_TXD0_GPIO_Port GPIOG
 #define SWO_Pin GPIO_PIN_3
 #define SWO_GPIO_Port GPIOB
-#define SIOC_Pin GPIO_PIN_6
-#define SIOC_GPIO_Port GPIOB
+#define SCCB_SIC_Pin GPIO_PIN_6
+#define SCCB_SIC_GPIO_Port GPIOB
 #define LD2_Pin GPIO_PIN_7
 #define LD2_GPIO_Port GPIOB
-#define SIOD_Pin GPIO_PIN_9
-#define SIOD_GPIO_Port GPIOB
+#define SCCB_SID_Pin GPIO_PIN_9
+#define SCCB_SID_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

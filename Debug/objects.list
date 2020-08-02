@@ -1,3 +1,7 @@
+"Core/Src/Camera/cambus.o"
+"Core/Src/Camera/ov7725.o"
+"Core/Src/Camera/sccb.o"
+"Core/Src/delay.o"
 "Core/Src/main.o"
 "Core/Src/stm32f7xx_hal_msp.o"
 "Core/Src/stm32f7xx_it.o"
