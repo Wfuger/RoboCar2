@@ -2,14 +2,22 @@
 
 #include "core_cm7.h"
 
-#pragma GCC push_options
-#pragma GCC optimize ("O3")
+TIM_HandleTypeDef *htim;
+
+void delay_us_init(TIM_HandleTypeDef *tim)
+{
+	htim = tim;
+}
+
+//#pragma GCC push_options
+//#pragma GCC optimize ("O3")
 void delay_us(uint32_t us)
 {
-	/* Go to number of cycles for system */
-	us *= (HAL_RCC_GetHCLKFreq() / 1000000);
+	__HAL_TIM_SET_COUNTER(htim, 0);
+	while(__HAL_TIM_GET_COUNTER(htim) < us);
+//	volatile uint32_t cycles = (SystemCoreClock/1000000L)*us;
+//	volatile uint32_t start = DWT->CYCCNT;
+//	while(DWT->CYCCNT - start < cycles);
 
-	  /* Delay till end */
-	for (uint32_t i = 0; i<us; ++i) asm("NOP");
 }
-#pragma GCC pop_options
+//#pragma GCC pop_options

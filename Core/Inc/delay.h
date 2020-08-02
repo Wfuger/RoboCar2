@@ -5,6 +5,7 @@
 
 #include "main.h"
 
+void delay_us_init();
 void delay_us(uint32_t us);
 
 #endif // __DELAY_H__
