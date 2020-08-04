@@ -262,28 +262,28 @@ void HAL_ETH_MspInit(ETH_HandleTypeDef* heth)
     PG11     ------> ETH_TX_EN
     PG13     ------> ETH_TXD0
     */
-    GPIO_InitStruct.Pin = RMII_MDC_Pin|RMII_RXD0_Pin|RMII_RXD1_Pin;
+    GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_4|GPIO_PIN_5;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF11_ETH;
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-    GPIO_InitStruct.Pin = RMII_REF_CLK_Pin|RMII_MDIO_Pin|RMII_CRS_DV_Pin;
+    GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_7;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF11_ETH;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    GPIO_InitStruct.Pin = RMII_TXD1_Pin;
+    GPIO_InitStruct.Pin = GPIO_PIN_13;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF11_ETH;
-    HAL_GPIO_Init(RMII_TXD1_GPIO_Port, &GPIO_InitStruct);
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-    GPIO_InitStruct.Pin = RMII_TX_EN_Pin|RMII_TXD0_Pin;
+    GPIO_InitStruct.Pin = GPIO_PIN_11|GPIO_PIN_13;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
@@ -324,13 +324,13 @@ void HAL_ETH_MspDeInit(ETH_HandleTypeDef* heth)
     PG11     ------> ETH_TX_EN
     PG13     ------> ETH_TXD0
     */
-    HAL_GPIO_DeInit(GPIOC, RMII_MDC_Pin|RMII_RXD0_Pin|RMII_RXD1_Pin);
+    HAL_GPIO_DeInit(GPIOC, GPIO_PIN_1|GPIO_PIN_4|GPIO_PIN_5);
 
-    HAL_GPIO_DeInit(GPIOA, RMII_REF_CLK_Pin|RMII_MDIO_Pin|RMII_CRS_DV_Pin);
+    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_7);
 
-    HAL_GPIO_DeInit(RMII_TXD1_GPIO_Port, RMII_TXD1_Pin);
+    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_13);
 
-    HAL_GPIO_DeInit(GPIOG, RMII_TX_EN_Pin|RMII_TXD0_Pin);
+    HAL_GPIO_DeInit(GPIOG, GPIO_PIN_11|GPIO_PIN_13);
 
   /* USER CODE BEGIN ETH_MspDeInit 1 */
 
@@ -475,7 +475,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
     PD8     ------> USART3_TX
     PD9     ------> USART3_RX
     */
-    GPIO_InitStruct.Pin = STLK_RX_Pin|STLK_TX_Pin;
+    GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_9;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
@@ -509,7 +509,7 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
     PD8     ------> USART3_TX
     PD9     ------> USART3_RX
     */
-    HAL_GPIO_DeInit(GPIOD, STLK_RX_Pin|STLK_TX_Pin);
+    HAL_GPIO_DeInit(GPIOD, GPIO_PIN_8|GPIO_PIN_9);
 
   /* USER CODE BEGIN USART3_MspDeInit 1 */
 
@@ -541,17 +541,17 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef* hpcd)
     PA11     ------> USB_OTG_FS_DM
     PA12     ------> USB_OTG_FS_DP
     */
-    GPIO_InitStruct.Pin = USB_SOF_Pin|USB_ID_Pin|USB_DM_Pin|USB_DP_Pin;
+    GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF10_OTG_FS;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    GPIO_InitStruct.Pin = USB_VBUS_Pin;
+    GPIO_InitStruct.Pin = GPIO_PIN_9;
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(USB_VBUS_GPIO_Port, &GPIO_InitStruct);
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
     /* Peripheral clock enable */
     __HAL_RCC_USB_OTG_FS_CLK_ENABLE();
@@ -585,8 +585,8 @@ void HAL_PCD_MspDeInit(PCD_HandleTypeDef* hpcd)
     PA11     ------> USB_OTG_FS_DM
     PA12     ------> USB_OTG_FS_DP
     */
-    HAL_GPIO_DeInit(GPIOA, USB_SOF_Pin|USB_VBUS_Pin|USB_ID_Pin|USB_DM_Pin
-                          |USB_DP_Pin);
+    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11
+                          |GPIO_PIN_12);
 
   /* USER CODE BEGIN USB_OTG_FS_MspDeInit 1 */
 

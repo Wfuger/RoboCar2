@@ -8,20 +8,20 @@
 #define WRITE_ADDR 			  0x42
 #define READ_ADDR  			  0x43
 
-#define SCCB_SID_PIN          (GPIO_PIN_9)
-#define SCCB_SID_PORT         (GPIOB)
+//#define SCCB_SID_PIN          (GPIO_PIN_9)
+//#define SCCB_SID_PORT         (GPIOB)
+//
+//#define SCCB_SIC_PIN          (GPIO_PIN_6)
+//#define SCCB_SIC_PORT         (GPIOB)
 
-#define SCCB_SIC_PIN          (GPIO_PIN_6)
-#define SCCB_SIC_PORT         (GPIOB)
+#define SCCB_SID_L()       	  HAL_GPIO_WritePin(SCCB_SID_GPIO_Port, SCCB_SID_Pin, GPIO_PIN_RESET)
+#define SCCB_SID_H()       	  HAL_GPIO_WritePin(SCCB_SID_GPIO_Port, SCCB_SID_Pin, GPIO_PIN_SET)
 
-#define SCCB_SID_L()       	  HAL_GPIO_WritePin(SCCB_SID_PORT, SCCB_SID_PIN, GPIO_PIN_RESET)
-#define SCCB_SID_H()       	  HAL_GPIO_WritePin(SCCB_SID_PORT, SCCB_SID_PIN, GPIO_PIN_SET)
+#define SCCB_SIC_L()          HAL_GPIO_WritePin(SCCB_SIC_GPIO_Port, SCCB_SIC_Pin, GPIO_PIN_RESET)
+#define SCCB_SIC_H()          HAL_GPIO_WritePin(SCCB_SIC_GPIO_Port, SCCB_SIC_Pin, GPIO_PIN_SET)
 
-#define SCCB_SIC_L()          HAL_GPIO_WritePin(SCCB_SIC_PORT, SCCB_SIC_PIN, GPIO_PIN_RESET)
-#define SCCB_SIC_H()          HAL_GPIO_WritePin(SCCB_SIC_PORT , SCCB_SIC_PIN, GPIO_PIN_SET)
-
-#define SCCB_DATA_IN    	  {GPIOB->MODER |= ~(0x3<<18);}
-#define SCCB_DATA_OUT     	  {GPIOB->MODER |= 0x1<<18;}
+//#define SCCB_DATA_IN    	  {GPIOB->MODER |= ~(0x3<<18);}
+//#define SCCB_DATA_OUT     	  {GPIOB->MODER |= 0x1<<18;}
 #define SCCB_SID_STATE	  	  HAL_GPIO_ReadPin(SCCB_SID_PORT, SCCB_SID_PIN)
 
 //void sccb_bus_init(void);

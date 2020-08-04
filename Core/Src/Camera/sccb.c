@@ -24,27 +24,48 @@
 //}
 
 
-#define hdsta 30
-#define	susto 30
-#define	susta 37
-#define	sudat 3
-#define	dvdat 26
-#define	dvack 26
-#define	high 30
-#define	low 37
-#define	buff 37
+#define hdsta 3
+#define	susto 3
+#define	susta 4
+#define	sudat 1
+#define	dvdat 3
+#define	dvack 3
+#define	high 3
+#define	low 4
+#define	buff 4
 
 #define stretchTime_us 1000
 
+GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+//bool sccb_init = false;
+//
+//
+//void init_sccb()
+//{
+//	GPIO_InitStruct.Pull = GPIO_NOPULL;
+//	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+//	GPIO_InitStruct.Pin = SCCB_SID_Pin;
+//}
+
+void data_in()
+{
+	LL_GPIO_SetPinMode(SCCB_SID_GPIO_Port, SCCB_SID_Pin, GPIO_MODE_INPUT);
+}
+
+void data_out()
+{
+	LL_GPIO_SetPinMode(SCCB_SID_GPIO_Port, SCCB_SID_Pin, GPIO_MODE_OUTPUT_OD);
+}
 
 bool read_sda()
 {
-	return HAL_GPIO_ReadPin(SCCB_SID_GPIO_Port, SCCB_SID_PIN);
+	return HAL_GPIO_ReadPin(SCCB_SID_GPIO_Port, SCCB_SID_Pin) == GPIO_PIN_SET;
 }
 
 bool read_scl()
 {
-	return HAL_GPIO_ReadPin(SCCB_SIC_GPIO_Port, SCCB_SIC_PIN);
+	return HAL_GPIO_ReadPin(SCCB_SIC_GPIO_Port, SCCB_SIC_Pin) == GPIO_PIN_SET;
 }
 
 void clock_stretching(uint32_t t_us)
@@ -60,16 +81,16 @@ void clock_stretching(uint32_t t_us)
  {
 	 SCCB_SID_H();
 	 SCCB_SIC_H();
-	 delay_hns(10);
+	 delay_us(100);
  }
 
  void start(void)
  {
    // SCL is high, set SDA from 1 to 0.
    SCCB_SID_L();
-   delay_hns(hdsta);
+   delay_us(hdsta);
    SCCB_SIC_L();
-   delay_hns(low);
+   delay_us(low);
  }
 
  void stop(void)
@@ -77,18 +98,18 @@ void clock_stretching(uint32_t t_us)
    // set SDA to 0
    SCCB_SID_L();
 
-   delay_hns(susto);
+   delay_us(susto);
 
    SCCB_SIC_H();
 
    clock_stretching(stretchTime_us);
 
    // Stop bit setup time, minimum 4us
-   delay_hns(susto);
+   delay_us(susto);
 
    // SCL is high, set SDA from 0 to 1
    SCCB_SID_H();
-   delay_hns(buff);
+   delay_us(buff);
  }
 
  void write_bit(bool bit)
@@ -98,19 +119,19 @@ void clock_stretching(uint32_t t_us)
    else		 SCCB_SID_L();
 
    // SDA change propagation delay
-   delay_hns(sudat);
+   delay_us(sudat);
 
    // Set SCL high to indicate a new valid SDA value is available
    SCCB_SIC_H();
 
    // Wait for SDA value to be read by slave, minimum of 4us for standard mode
-   delay_hns(high);
+   delay_us(high);
 
    clock_stretching(stretchTime_us);
 
    // Clear the SCL to low in preparation for next change
    SCCB_SIC_L();
-   delay_hns(low);
+   delay_us(low);
  }
 
  // Read a bit from I2C bus
@@ -118,25 +139,26 @@ void clock_stretching(uint32_t t_us)
    bool bit;
 
    // Let the slave drive data
-   SCCB_SID_H();
-
+//   SCCB_SID_H();
+//   data_in();
    // Wait for SDA value to be written by slave, minimum of 4us for standard mode
-   delay_hns(dvdat);
+   delay_us(dvdat);
 
    // Set SCL high to indicate a new valid SDA value is available
    SCCB_SIC_H();
    clock_stretching(stretchTime_us);
 
    // Wait for SDA value to be written by slave, minimum of 4us for standard mode
-   delay_hns(high);
+   delay_us(high);
 
    // SCL is high, read out bit
    bit = read_sda();
 
    // Set SCL low in preparation for next operation
    SCCB_SIC_L();
+//   data_out();
 
-   delay_hns(low);
+   delay_us(low);
 
    return bit;
  }
@@ -153,7 +175,7 @@ void clock_stretching(uint32_t t_us)
      byte <<= 1;
    }
 
-   read_bit();
+   nack = read_bit();
 
    SCCB_SID_H();
 
@@ -166,12 +188,16 @@ void clock_stretching(uint32_t t_us)
    unsigned char byte = 0;
    unsigned char bit;
 
+   data_in();
    for (bit = 0; bit < 8; ++bit) {
-     byte = (byte << 1) | read_bit();
+     byte |= read_bit();
+     byte <<= 1;
    }
 
    write_bit(nack);
    SCCB_SID_H();
+
+   data_out();
 
    return byte;
 }
@@ -183,7 +209,7 @@ void write_reg(uint8_t reg, uint8_t *pData)
 	start();
 
 	/*send slave addres*/
-	write_byte(WRITE_ADDR & 0xFE);
+	write_byte(WRITE_ADDR);
 
 	/*send register addres*/
 	write_byte(reg);
@@ -200,7 +226,7 @@ void write_reg(uint8_t reg, uint8_t *pData)
 
  	start();
 
- 	write_byte(WRITE_ADDR & 0xFE);
+ 	write_byte(WRITE_ADDR);
  	write_byte(reg);
 
  	stop();
@@ -215,12 +241,14 @@ void write_reg(uint8_t reg, uint8_t *pData)
 
  uint8_t sccb_write(int regID, int regDat)
  {
+//	 if (!sccb_init) init_sccb();
 	 write_reg(regID, regDat);
 	 return 0;
  }
 
  uint8_t sccb_read(uint8_t regID, uint8_t* regDat)
  {
+//	 if (!sccb_init) init_sccb();
 	 read_reg(regID, regDat);
 	 return 0;
  }

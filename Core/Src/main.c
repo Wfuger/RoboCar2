@@ -25,6 +25,7 @@
 #include "cambus.h"
 #include "ov7725.h"
 #include "delay.h"
+#include "sccb.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -132,25 +133,36 @@ int main(void)
   delay_us_init(&htim1);
   delay_us(5);
 
+
   uint8_t data;
-  sccb_read(0x01, &data);
+  sccb_read(0x0A, &data);
 
-  uint8_t err = set_framesize();
-  if (!err) HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_SET);
+//  SCCB_SID_H();
+//  SCCB_SIC_H();
+//  delay_us(1);
 
+  // SCL is high, set SDA from 1 to 0.
 
-  err = set_pixformat();
-  if (!err) HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+//  SCCB_SID_L();
+//  delay_us(3);
+//  SCCB_SIC_L();
+//  delay_us(4);
 
-  if (HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_CONTINUOUS, (uint32_t)img, IMG_SIZE) != HAL_OK) {
-	  HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET);
-  }
+//  uint8_t err = set_framesize();
+//  if (!err) HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_SET);
+//
+//  err = set_pixformat();
+//  if (!err) HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+//
+//  if (HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_CONTINUOUS, (uint32_t)img, IMG_SIZE) != HAL_OK) {
+//	  HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET);
+//  }
 
 
   HAL_Delay(1000);
-  HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_RESET);
-  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
-  HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -158,15 +170,15 @@ int main(void)
 	while (1)
 	{
 	  HAL_Delay(10);
-	  if (HAL_DMA_GetState(&hdma_dcmi) == HAL_DMA_STATE_BUSY)
-		  HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET);
-	  else
-		  HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
-
-	  if (HAL_DCMI_GetState(&hdcmi) == HAL_DCMI_STATE_BUSY)
-			  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
-		  else
-			  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+//	  if (HAL_DMA_GetState(&hdma_dcmi) == HAL_DMA_STATE_BUSY)
+//		  HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET);
+//	  else
+//		  HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
+//
+//	  if (HAL_DCMI_GetState(&hdcmi) == HAL_DCMI_STATE_BUSY)
+//			  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+//		  else
+//			  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -364,51 +376,52 @@ static void MX_TIM1_Init(void)
   * @brief TIM2 Initialization Function
   * @param None
   * @retval None
-  */static void MX_TIM2_Init(void)
-  {
+  */
+static void MX_TIM2_Init(void)
+{
 
-    /* USER CODE BEGIN TIM2_Init 0 */
+  /* USER CODE BEGIN TIM2_Init 0 */
     int frequency = 16000000;
     int pclk = HAL_RCC_GetPCLK2Freq();
     int period = (pclk / frequency) - 1;
-    /* USER CODE END TIM2_Init 0 */
+  /* USER CODE END TIM2_Init 0 */
 
-    TIM_MasterConfigTypeDef sMasterConfig = {0};
-    TIM_OC_InitTypeDef sConfigOC = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
 
-    /* USER CODE BEGIN TIM2_Init 1 */
+  /* USER CODE BEGIN TIM2_Init 1 */
 
-    /* USER CODE END TIM2_Init 1 */
-    htim2.Instance = TIM2;
-    htim2.Init.Prescaler = 0;
-    htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-    htim2.Init.Period = period;
-    htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-    htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-    if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
-    {
-      Error_Handler();
-    }
-    sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-    sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-    if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
-    {
-      Error_Handler();
-    }
-    sConfigOC.OCMode = TIM_OCMODE_PWM1;
-    sConfigOC.Pulse = period/2;
-    sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-    sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-    if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-    {
-      Error_Handler();
-    }
-    /* USER CODE BEGIN TIM2_Init 2 */
-
-    /* USER CODE END TIM2_Init 2 */
-    HAL_TIM_MspPostInit(&htim2);
-
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 0;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 4;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
   }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 2;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
+  HAL_TIM_MspPostInit(&htim2);
+
+}
 
 /**
   * @brief USART3 Initialization Function
@@ -503,63 +516,105 @@ static void MX_DMA_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  LL_EXTI_InitTypeDef EXTI_InitStruct = {0};
+  LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOE_CLK_ENABLE();
-  __HAL_RCC_GPIOC_CLK_ENABLE();
-  __HAL_RCC_GPIOH_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
-  __HAL_RCC_GPIOD_CLK_ENABLE();
-  __HAL_RCC_GPIOG_CLK_ENABLE();
+  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOE);
+  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOC);
+  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOH);
+  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
+  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
+  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOD);
+  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOG);
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, LD1_Pin|LD3_Pin|SCCB_SIC_Pin|LD2_Pin, GPIO_PIN_RESET);
+  /**/
+  LL_GPIO_ResetOutputPin(LD1_GPIO_Port, LD1_Pin);
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(USB_PowerSwitchOn_GPIO_Port, USB_PowerSwitchOn_Pin, GPIO_PIN_RESET);
+  /**/
+  LL_GPIO_ResetOutputPin(LD3_GPIO_Port, LD3_Pin);
 
-  /*Configure GPIO pin : USER_Btn_Pin */
-  GPIO_InitStruct.Pin = USER_Btn_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(USER_Btn_GPIO_Port, &GPIO_InitStruct);
+  /**/
+  LL_GPIO_ResetOutputPin(USB_PowerSwitchOn_GPIO_Port, USB_PowerSwitchOn_Pin);
 
-  /*Configure GPIO pins : LD1_Pin LD3_Pin SCCB_SIC_Pin LD2_Pin */
-  GPIO_InitStruct.Pin = LD1_Pin|LD3_Pin|SCCB_SIC_Pin|LD2_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  /**/
+  LL_GPIO_ResetOutputPin(LD2_GPIO_Port, LD2_Pin);
 
-  /*Configure GPIO pin : USB_PowerSwitchOn_Pin */
+  /**/
+  LL_GPIO_SetOutputPin(SCCB_SIC_GPIO_Port, SCCB_SIC_Pin);
+
+  /**/
+  LL_GPIO_SetOutputPin(SCCB_SID_GPIO_Port, SCCB_SID_Pin);
+
+  /**/
+  LL_SYSCFG_SetEXTISource(LL_SYSCFG_EXTI_PORTC, LL_SYSCFG_EXTI_LINE13);
+
+  /**/
+  EXTI_InitStruct.Line_0_31 = LL_EXTI_LINE_13;
+  EXTI_InitStruct.LineCommand = ENABLE;
+  EXTI_InitStruct.Mode = LL_EXTI_MODE_IT;
+  EXTI_InitStruct.Trigger = LL_EXTI_TRIGGER_RISING;
+  LL_EXTI_Init(&EXTI_InitStruct);
+
+  /**/
+  LL_GPIO_SetPinPull(USER_Btn_GPIO_Port, USER_Btn_Pin, LL_GPIO_PULL_NO);
+
+  /**/
+  LL_GPIO_SetPinMode(USER_Btn_GPIO_Port, USER_Btn_Pin, LL_GPIO_MODE_INPUT);
+
+  /**/
+  GPIO_InitStruct.Pin = LD1_Pin;
+  GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
+  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+  LL_GPIO_Init(LD1_GPIO_Port, &GPIO_InitStruct);
+
+  /**/
+  GPIO_InitStruct.Pin = LD3_Pin;
+  GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
+  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+  LL_GPIO_Init(LD3_GPIO_Port, &GPIO_InitStruct);
+
+  /**/
   GPIO_InitStruct.Pin = USB_PowerSwitchOn_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(USB_PowerSwitchOn_GPIO_Port, &GPIO_InitStruct);
+  GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
+  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+  LL_GPIO_Init(USB_PowerSwitchOn_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : USB_OverCurrent_Pin */
+  /**/
   GPIO_InitStruct.Pin = USB_OverCurrent_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(USB_OverCurrent_GPIO_Port, &GPIO_InitStruct);
+  GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+  LL_GPIO_Init(USB_OverCurrent_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : SCCB_SIC_Pin */
+  /**/
   GPIO_InitStruct.Pin = SCCB_SIC_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-  HAL_GPIO_Init(SCCB_SIC_GPIO_Port, &GPIO_InitStruct);
+  GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
+  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_OPENDRAIN;
+  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+  LL_GPIO_Init(SCCB_SIC_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : SCCB_SID_Pin */
+  /**/
+  GPIO_InitStruct.Pin = LD2_Pin;
+  GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
+  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+  LL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
+
+  /**/
   GPIO_InitStruct.Pin = SCCB_SID_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
-  HAL_GPIO_Init(SCCB_SID_GPIO_Port, &GPIO_InitStruct);
-
-  HAL_GPIO_WritePin(SCCB_SID_GPIO_Port, SCCB_SID_Pin, GPIO_PIN_SET);
-  HAL_GPIO_WritePin(SCCB_SIC_GPIO_Port, SCCB_SIC_Pin, GPIO_PIN_SET);
+  GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
+  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_OPENDRAIN;
+  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+  LL_GPIO_Init(SCCB_SID_GPIO_Port, &GPIO_InitStruct);
 
 }
 
